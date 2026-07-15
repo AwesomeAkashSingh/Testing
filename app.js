@@ -157,14 +157,14 @@
     }
   }
 
-  function populatePersonFilter() {
+/*  function populatePersonFilter() {
     const select = document.getElementById('personFilter');
     const current = select.value;
     const people = [...new Set(allEntries.map(e => e.account).filter(Boolean))].sort();
     select.innerHTML = '<option value="ALL">All people</option>' +
       people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
     if (people.includes(current)) select.value = current;
-  }
+  }*/
 
   function render() {
     const person = document.getElementById('personFilter').value;
