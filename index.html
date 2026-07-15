@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dues Ledger</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Personal Ledger — Live from Google Sheets</div>
+    <h1>Dues Dashboard</h1>
+    <div class="sub">Every card, every person, sorted by what's due soonest. Pending is calculated as Due minus Paid, always current.</div>
+    <div class="controls">
+      <select id="personFilter"><option value="ALL">All people</option></select>
+      <select id="statusFilter">
+        <option value="ALL">All statuses</option>
+        <option value="overdue">Overdue</option>
+        <option value="soon">Due soon (≤3d)</option>
+        <option value="upcoming">Upcoming (≤10d)</option>
+        <option value="later">Later</option>
+        <option value="paid">Paid</option>
+      </select>
+      <button class="refresh" onclick="loadData()">↻ Refresh</button>
+      <span class="updated-tag" id="updatedTag"></span>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="section-label">Entries</div>
+  <div id="content" class="loading">Loading dues…</div>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
