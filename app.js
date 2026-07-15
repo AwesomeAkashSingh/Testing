@@ -147,8 +147,8 @@
 
       populatePersonFilter();
       render();
-      document.getElementById('updatedTag').textContent =
-        'Fetched ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      /* document.getElementById('updatedTag').textContent =
+        'Fetched ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); */
 
     } catch (err) {
       content.className = 'err';
@@ -157,14 +157,14 @@
     }
   }
 
-/*  function populatePersonFilter() {
+  function populatePersonFilter() {
     const select = document.getElementById('personFilter');
     const current = select.value;
     const people = [...new Set(allEntries.map(e => e.account).filter(Boolean))].sort();
     select.innerHTML = '<option value="ALL">All people</option>' +
       people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
     if (people.includes(current)) select.value = current;
-  }*/
+  }
 
   function render() {
     const person = document.getElementById('personFilter').value;
