@@ -172,6 +172,7 @@
 
     const filtered = allEntries.filter(e => {
       const cls = classify(e);
+      if (e.pending <= 0) return false;
       if (person !== 'ALL' && e.account !== person) return false;
       if (status !== 'ALL' && cls !== status) return false;
       return true;
@@ -223,8 +224,6 @@
           <div class="t-row"><span class="l">Due</span><span class="v">${fmtRs(e.due)}</span></div>
           <div class="t-row"><span class="l">Paid</span><span class="v">${fmtRs(e.paid)}</span></div>
           <div class="t-row"><span class="l">Pending</span><span class="v pending ${e.pending <= 0 ? 'zero' : ''}">${fmtRs(e.pending)}</span></div>
-          ${e.statement ? `<div class="t-row"><span class="l">Statement</span><span class="v">${escapeHtml(e.statement)}</span></div>` : ''}
-          ${e.updatedOn ? `<div class="t-row"><span class="l">Updated</span><span class="v">${escapeHtml(e.updatedOn)}</span></div>` : ''}
           ${e.totalLimit > 0 ? `
             <div class="limit-track"><div class="limit-fill" style="width:${limitPct}%"></div></div>
             <div class="limit-note">${fmtRs(e.totalLimit - e.currentLimit)} used of ${fmtRs(e.totalLimit)} (${limitPct}%)</div>
