@@ -66,12 +66,13 @@
     color: var(--paper);
   }
   button.refresh:hover { background: #0d1420; }
-  .updated-tag {
+ 
+/* .updated-tag {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--ink-soft);
     margin-left: auto;
-  }
+  } */
 
   .stats {
     display: grid;
