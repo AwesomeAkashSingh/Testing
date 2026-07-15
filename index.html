@@ -301,10 +301,10 @@
     return new Date(+gvizMatch[1], +gvizMatch[2], +gvizMatch[3]);
   }
 
-  // DD/MM/YYYY or DD-MM-YYYY (adjust to MM/DD/YYYY below if that's your sheet's format)
-  const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if (dmyMatch) {
-    let [, day, month, year] = dmyMatch;
+  // MM/DD/YYYY or MM-DD-YYYY
+  const mdyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (mdyMatch) {
+    let [, month, day, year] = mdyMatch;
     if (year.length === 2) year = '20' + year;
     const d = new Date(+year, +month - 1, +day);
     return isNaN(d.getTime()) ? null : d;
