@@ -292,16 +292,27 @@
   }
 
   function parseDate(v) {
-    if (!v) return null;
-    const s = String(v).trim();
-    // Handle "Date(2026,6,15)" gviz format just in case, else normal parse
-    const gvizMatch = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-    if (gvizMatch) {
-      return new Date(+gvizMatch[1], +gvizMatch[2], +gvizMatch[3]);
-    }
-    const d = new Date(s);
+  if (!v) return null;
+  const s = String(v).trim();
+
+  // gviz "Date(2026,6,15)" format
+  const gvizMatch = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (gvizMatch) {
+    return new Date(+gvizMatch[1], +gvizMatch[2], +gvizMatch[3]);
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY (adjust to MM/DD/YYYY below if that's your sheet's format)
+  const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (dmyMatch) {
+    let [, day, month, year] = dmyMatch;
+    if (year.length === 2) year = '20' + year;
+    const d = new Date(+year, +month - 1, +day);
     return isNaN(d.getTime()) ? null : d;
   }
+
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
 
   function daysUntil(dateObj) {
     const today = new Date(); today.setHours(0,0,0,0);
