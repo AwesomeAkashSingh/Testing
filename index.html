@@ -222,9 +222,29 @@
   .err { color: var(--overdue); border-color: var(--overdue); }
 
   @media (max-width: 560px) {
-    h1 { font-size: 30px; }
-    .wrap { padding: 0 16px 60px; }
+  h1 { font-size: 28px; }
+  .wrap { padding: 0 14px 60px; }
+  .sub { font-size: 13px; }
+
+  .controls { gap: 8px; }
+  .controls select, .controls button {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 11px;
+    padding: 9px 10px;
   }
+  .updated-tag { width: 100%; text-align: left; margin-left: 0; order: 10; }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat { padding: 14px 16px; }
+  .stat .n { font-size: 22px; }
+
+  .grid { grid-template-columns: 1fr; }
+  .ticket { padding: 14px 16px 12px; }
+  .t-card-name { font-size: 16px; }
+}
 </style>
 </head>
 <body>
