@@ -1,0 +1,238 @@
+  // ── Configure your sheet here ──
+  const SHEET_ID = '1q4EhX1RNMWXooqszhMz_X9if9Qyj3zRZ-8BcXwHLy7Y';
+  const SHEET_NAME = 'Sheet1';
+  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+  let allEntries = [];
+
+  function parseCSV(text) {
+    // Simple CSV parser handling quoted fields with commas
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i], next = text[i + 1];
+      if (inQuotes) {
+        if (c === '"' && next === '"') { field += '"'; i++; }
+        else if (c === '"') { inQuotes = false; }
+        else { field += c; }
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(field); field = ''; }
+        else if (c === '\r') { /* skip */ }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else { field += c; }
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function parseNumber(v) {
+    if (!v) return 0;
+    const cleaned = String(v).replace(/[₹,\s]/g, '');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function parseDate(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+
+  // gviz "Date(2026,6,15)" format
+  const gvizMatch = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (gvizMatch) {
+    return new Date(+gvizMatch[1], +gvizMatch[2], +gvizMatch[3]);
+  }
+
+  // MM/DD/YYYY or MM-DD-YYYY
+  const mdyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (mdyMatch) {
+    let [, month, day, year] = mdyMatch;
+    if (year.length === 2) year = '20' + year;
+    const d = new Date(+year, +month - 1, +day);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+  function daysUntil(dateObj) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const t = new Date(dateObj); t.setHours(0,0,0,0);
+    return Math.round((t - today) / 86400000);
+  }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function fmtRs(n) {
+    return '₹' + (n || 0).toLocaleString('en-IN');
+  }
+
+  function classify(e) {
+    if (e.pending <= 0) return 'paid';
+    if (e.daysUntilDue === null) return 'later';
+    if (e.daysUntilDue < 0) return 'overdue';
+    if (e.daysUntilDue <= 3) return 'soon';
+    if (e.daysUntilDue <= 10) return 'upcoming';
+    return 'later';
+  }
+
+  function statusLabel(e, cls) {
+    if (cls === 'paid') return 'Paid';
+    const d = e.daysUntilDue;
+    if (d === null) return 'No date';
+    if (d < 0) return Math.abs(d) + 'd overdue';
+    if (d === 0) return 'Due today';
+    return 'in ' + d + 'd';
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+    return div.innerHTML;
+  }
+
+  async function loadData() {
+    const content = document.getElementById('content');
+    content.className = 'loading';
+    content.textContent = 'Loading dues…';
+
+    try {
+      const res = await fetch(CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' — check sheet sharing is set to "Anyone with link can view"');
+      const text = await res.text();
+      const rows = parseCSV(text);
+      if (rows.length < 2) throw new Error('Sheet appears empty');
+
+      const dataRows = rows.slice(1); // skip header
+      allEntries = [];
+
+      dataRows.forEach(r => {
+        const account = (r[0] || '').trim();
+        const cardName = (r[1] || '').trim();
+        if (!account && !cardName) return;
+
+        
+        const dueDate = parseDate(r[2]);
+        const due = parseNumber(r[3]);
+        const paid = parseNumber(r[4]);
+        let pending = due - paid;
+        if (pending < 0) pending = 0;
+
+        const updatedOn = r[6] || '';
+        const statement = r[7] || '';
+        const totalLimit = parseNumber(r[9]);
+        const currentLimit = parseNumber(r[10]);
+
+        allEntries.push({
+          account, cardName,
+          dueDate, dueDateDisplay: fmtDate(dueDate),
+          due, paid, pending,
+          updatedOn, statement,
+          totalLimit, currentLimit,
+          daysUntilDue: dueDate ? daysUntil(dueDate) : null
+        });
+      });
+
+      allEntries.sort((a, b) => {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return a.dueDate - b.dueDate;
+      });
+
+      populatePersonFilter();
+      render();
+      document.getElementById('updatedTag').textContent =
+        'Fetched ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+    } catch (err) {
+      content.className = 'err';
+      content.innerHTML = 'Could not load sheet data.<br><br>' + escapeHtml(err.message) +
+        '<br><br>Make sure the sheet is shared as "Anyone with the link can view".';
+    }
+  }
+
+  function populatePersonFilter() {
+    const select = document.getElementById('personFilter');
+    const current = select.value;
+    const people = [...new Set(allEntries.map(e => e.account).filter(Boolean))].sort();
+    select.innerHTML = '<option value="ALL">All people</option>' +
+      people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+    if (people.includes(current)) select.value = current;
+  }
+
+  function render() {
+    const person = document.getElementById('personFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    const filtered = allEntries.filter(e => {
+      const cls = classify(e);
+      if (person !== 'ALL' && e.account !== person) return false;
+      if (status !== 'ALL' && cls !== status) return false;
+      return true;
+    });
+
+    renderStats();
+    renderGrid(filtered);
+  }
+
+  function renderStats() {
+    const totalPending = allEntries.reduce((s, e) => s + e.pending, 0);
+    const overdue = allEntries.filter(e => classify(e) === 'overdue').length;
+    const soon = allEntries.filter(e => classify(e) === 'soon').length;
+    const paid = allEntries.filter(e => classify(e) === 'paid').length;
+
+    document.getElementById('stats').innerHTML = `
+      <div class="stat"><div class="n" style="color:var(--overdue)">${fmtRs(totalPending)}</div><div class="l">Total pending</div></div>
+      <div class="stat"><div class="n" style="color:var(--overdue)">${overdue}</div><div class="l">Overdue</div></div>
+      <div class="stat"><div class="n" style="color:var(--soon)">${soon}</div><div class="l">Due soon</div></div>
+      <div class="stat"><div class="n" style="color:var(--paid)">${paid}</div><div class="l">Paid up</div></div>
+      <div class="stat"><div class="n">${allEntries.length}</div><div class="l">Total entries</div></div>
+    `;
+  }
+
+  function renderGrid(entries) {
+    const content = document.getElementById('content');
+    if (!entries.length) {
+      content.className = 'empty';
+      content.textContent = 'No entries match this filter.';
+      return;
+    }
+    content.className = 'grid';
+    content.innerHTML = entries.map(e => {
+      const cls = classify(e);
+      const label = statusLabel(e, cls);
+      const limitPct = e.totalLimit > 0 ? Math.min(100, Math.round(((e.totalLimit - e.currentLimit) / e.totalLimit) * 100)) : null;
+      return `
+        <div class="ticket ${cls}">
+          <div class="t-top">
+            <div>
+              <div class="t-card-name">${escapeHtml(e.cardName || 'Unnamed card')}</div>
+              <div class="t-account">${escapeHtml(e.account)}</div>
+            </div>
+            <div class="pill ${cls}">${label}</div>
+          </div>
+          <div class="t-row"><span class="l">Due date</span><span class="v">${e.dueDateDisplay}</span></div>
+          <div class="t-row"><span class="l">Due</span><span class="v">${fmtRs(e.due)}</span></div>
+          <div class="t-row"><span class="l">Paid</span><span class="v">${fmtRs(e.paid)}</span></div>
+          <div class="t-row"><span class="l">Pending</span><span class="v pending ${e.pending <= 0 ? 'zero' : ''}">${fmtRs(e.pending)}</span></div>
+          ${e.statement ? `<div class="t-row"><span class="l">Statement</span><span class="v">${escapeHtml(e.statement)}</span></div>` : ''}
+          ${e.updatedOn ? `<div class="t-row"><span class="l">Updated</span><span class="v">${escapeHtml(e.updatedOn)}</span></div>` : ''}
+          ${e.totalLimit > 0 ? `
+            <div class="limit-track"><div class="limit-fill" style="width:${limitPct}%"></div></div>
+            <div class="limit-note">${fmtRs(e.totalLimit - e.currentLimit)} used of ${fmtRs(e.totalLimit)} (${limitPct}%)</div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('personFilter').addEventListener('change', render);
+  document.getElementById('statusFilter').addEventListener('change', render);
+
+  loadData();
