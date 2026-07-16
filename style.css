@@ -239,3 +239,56 @@
   .ticket { padding: 14px 16px 12px; }
   .t-card-name { font-size: 16px; }
 }
+
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.tab {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 20px;
+  cursor: pointer;
+}
+.tab.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.person-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.person-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 20px;
+  cursor: pointer;
+}
+.person-btn.active {
+  background: var(--upcoming);
+  color: #fff;
+  border-color: var(--upcoming);
+}
+
+.tab-content {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  border: 1.5px dashed var(--line);
+  border-radius: 4px;
+}
