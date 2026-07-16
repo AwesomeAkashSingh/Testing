@@ -179,20 +179,10 @@
 
   function renderStats() {
     const totalPending = allEntries.reduce((s, e) => s + e.pending, 0);
-    const overdue = allEntries.filter(e => classify(e) === 'overdue').length;
-    const soon = allEntries.filter(e => classify(e) === 'soon').length;
-    const paid = allEntries.filter(e => classify(e) === 'paid').length;
-
     document.getElementById('stats').innerHTML = `
       <div class="stat"><div class="n" style="color:var(--overdue)">${fmtRs(totalPending)}</div><div class="l">Total pending</div></div>
-      
     `;
   }
-
-// <div class="stat"><div class="n" style="color:var(--paid)">${paid}</div><div class="l">Paid up</div></div>
-// <div class="stat"><div class="n">${allEntries.length}</div><div class="l">Total entries</div></div>
-// <div class="stat"><div class="n" style="color:var(--overdue)">${overdue}</div><div class="l">Overdue</div></div>
-// <div class="stat"><div class="n" style="color:var(--soon)">${soon}</div><div class="l">Due soon</div></div>
 
   function renderGrid(entries) {
     const content = document.getElementById('content');
