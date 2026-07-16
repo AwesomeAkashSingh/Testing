@@ -163,6 +163,7 @@
 .due-table tbody tr.paid { border-left-color: var(--paid); }
 
 .due-table .num { font-family: 'IBM Plex Mono', monospace; }
+.due-table .highlight-col { background: #fff3b0; }
 .due-table .pending-cell { font-family: 'IBM Plex Mono', monospace; color: var(--overdue); font-weight: 600; }
 .due-table .pending-cell.zero { color: var(--paid); }
 .due-table .status-cell { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; }
