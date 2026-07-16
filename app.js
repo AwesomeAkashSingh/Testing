@@ -113,24 +113,25 @@
       allEntries = [];
 
       dataRows.forEach(r => {
-        const account = (r[0] || '').trim();
-        const cardName = (r[1] || '').trim();
+        const account = (r[0] || '').trim();   // A: Name
+        const bank = (r[1] || '').trim();      // B: Bank
+        const cardName = (r[2] || '').trim();  // C: Card name
+        const ending = (r[3] || '').trim();    // D: Ending
         if (!account && !cardName) return;
 
-        
-        const dueDate = parseDate(r[2]);
-        const due = parseNumber(r[3]);
-        const paid = parseNumber(r[4]);
+        const dueDate = parseDate(r[4]);       // E: Due date
+        const due = parseNumber(r[5]);         // F: Due (Rs.)
+        const paid = parseNumber(r[6]);        // G: Paid (Rs.)
         let pending = due - paid;
         if (pending < 0) pending = 0;
 
-        const updatedOn = r[6] || '';
-        const statement = r[7] || '';
-        const totalLimit = parseNumber(r[9]);
-        const currentLimit = parseNumber(r[10]);
+        const updatedOn = r[8] || '';          // I: Updated on
+        const statement = r[9] || '';          // J: Statement
+        const totalLimit = parseNumber(r[11]); // L: Total limit
+        const currentLimit = parseNumber(r[12]); // M: Current limit
 
         allEntries.push({
-          account, cardName,
+          account, bank, cardName, ending,
           dueDate, dueDateDisplay: fmtDate(dueDate),
           due, paid, pending,
           updatedOn, statement,
@@ -196,10 +197,11 @@
       <table class="due-table">
         <thead>
           <tr>
-            <th>Card</th>
-            <th>Person</th>
-            <th>Due date</th>
-            <th>Due</th>
+            <th>Name</th>
+            <th>Bank</th>
+            <th>Ending</th>
+            <th class="highlight-col">Due date</th>
+            <th class="highlight-col">Due</th>
             <th>Paid</th>
             <th>Pending</th>
           </tr>
@@ -209,10 +211,11 @@
             const cls = classify(e);
             return `
               <tr class="${cls}">
-                <td>${escapeHtml(e.cardName || 'Unnamed')}</td>
                 <td>${escapeHtml(e.account)}</td>
-                <td class="num">${e.dueDateDisplay}</td>
-                <td class="num">${fmtRs(e.due)}</td>
+                <td>${escapeHtml(e.bank)}</td>
+                <td class="num">${escapeHtml(e.ending)}</td>
+                <td class="num highlight-col">${e.dueDateDisplay}</td>
+                <td class="num highlight-col">${fmtRs(e.due)}</td>
                 <td class="num">${fmtRs(e.paid)}</td>
                 <td class="pending-cell ${e.pending <= 0 ? 'zero' : ''}">${fmtRs(e.pending)}</td>
               </tr>
