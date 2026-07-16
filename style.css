@@ -76,13 +76,16 @@
   } */
 
   .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1px;
-    background: var(--line);
-    border: 1.5px solid var(--ink);
-    margin-bottom: 36px;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1.5px solid var(--ink);
+  margin-bottom: 24px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
   .stat {
     background: var(--card);
     padding: 18px 20px;
@@ -120,12 +123,48 @@
     background: var(--line);
   }
 
-  .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 14px;
-  justify-content: center;
+  .due-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
 }
+.due-table th, .due-table td {
+  border: 1px solid var(--line);
+  padding: 6px 5px;
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.due-table thead th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  background: var(--card);
+  border-bottom: 1.5px solid var(--ink);
+}
+.due-table tbody tr {
+  border-left: 4px solid var(--later);
+  background: var(--card);
+}
+.due-table tbody tr.overdue { border-left-color: var(--overdue); }
+.due-table tbody tr.soon { border-left-color: var(--soon); }
+.due-table tbody tr.upcoming { border-left-color: var(--upcoming); }
+.due-table tbody tr.later { border-left-color: var(--later); }
+.due-table tbody tr.paid { border-left-color: var(--paid); }
+
+.due-table .num { font-family: 'IBM Plex Mono', monospace; }
+.due-table .pending-cell { font-family: 'IBM Plex Mono', monospace; color: var(--overdue); font-weight: 600; }
+.due-table .pending-cell.zero { color: var(--paid); }
+.due-table .status-cell { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; }
+.due-table .status-cell.overdue { color: var(--overdue); }
+.due-table .status-cell.soon { color: var(--soon); }
+.due-table .status-cell.upcoming { color: var(--upcoming); }
+.due-table .status-cell.later { color: var(--later); }
+.due-table .status-cell.paid { color: var(--paid); }
 
   .ticket {
     background: var(--card);
@@ -238,9 +277,8 @@
   .stat { padding: 14px 16px; }
   .stat .n { font-size: 22px; }
 
-  .grid { grid-template-columns: 1fr; }
-  .ticket { padding: 14px 16px 12px; }
-  .t-card-name { font-size: 16px; }
+  .due-table { font-size: 9.5px; }
+  .due-table th, .due-table td { padding: 4px 3px; }
 }
 
 .nav-tabs {
