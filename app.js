@@ -66,11 +66,11 @@
 
   function fmtDate(d) {
     if (!d) return '—';
-    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
   }
 
   function fmtRs(n) {
-    return '₹' + (n || 0).toLocaleString('en-IN');
+    return '₹' + Math.ceil(n || 0).toLocaleString('en-IN');
   }
 
   function classify(e) {
@@ -202,16 +202,11 @@
             <th>Due</th>
             <th>Paid</th>
             <th>Pending</th>
-            <th>Status</th>
-            <th>Limit used</th>
           </tr>
         </thead>
         <tbody>
           ${entries.map(e => {
             const cls = classify(e);
-            const label = statusLabel(e, cls);
-            const limitPct = e.totalLimit > 0 ? Math.min(100, Math.round(((e.totalLimit - e.currentLimit) / e.totalLimit) * 100)) : null;
-            const limitText = e.totalLimit > 0 ? `${fmtRs(e.totalLimit - e.currentLimit)}/${fmtRs(e.totalLimit)} (${limitPct}%)` : '—';
             return `
               <tr class="${cls}">
                 <td>${escapeHtml(e.cardName || 'Unnamed')}</td>
@@ -220,8 +215,6 @@
                 <td class="num">${fmtRs(e.due)}</td>
                 <td class="num">${fmtRs(e.paid)}</td>
                 <td class="pending-cell ${e.pending <= 0 ? 'zero' : ''}">${fmtRs(e.pending)}</td>
-                <td class="status-cell ${cls}">${label}</td>
-                <td class="num">${limitText}</td>
               </tr>
             `;
           }).join('')}
