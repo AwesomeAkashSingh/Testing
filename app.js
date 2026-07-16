@@ -201,31 +201,43 @@
       content.textContent = 'No entries match this filter.';
       return;
     }
-    content.className = 'grid';
-    content.innerHTML = entries.map(e => {
-      const cls = classify(e);
-      const label = statusLabel(e, cls);
-      const limitPct = e.totalLimit > 0 ? Math.min(100, Math.round(((e.totalLimit - e.currentLimit) / e.totalLimit) * 100)) : null;
-      return `
-        <div class="ticket ${cls}">
-          <div class="t-top">
-            <div>
-              <div class="t-card-name">${escapeHtml(e.cardName || 'Unnamed card')}</div>
-              <div class="t-account">${escapeHtml(e.account)}</div>
-            </div>
-            <div class="pill ${cls}">${label}</div>
-          </div>
-          <div class="t-row"><span class="l">Due date</span><span class="v">${e.dueDateDisplay}</span></div>
-          <div class="t-row"><span class="l">Due</span><span class="v">${fmtRs(e.due)}</span></div>
-          <div class="t-row"><span class="l">Paid</span><span class="v">${fmtRs(e.paid)}</span></div>
-          <div class="t-row"><span class="l">Pending</span><span class="v pending ${e.pending <= 0 ? 'zero' : ''}">${fmtRs(e.pending)}</span></div>
-          ${e.totalLimit > 0 ? `
-            <div class="limit-track"><div class="limit-fill" style="width:${limitPct}%"></div></div>
-            <div class="limit-note">${fmtRs(e.totalLimit - e.currentLimit)} used of ${fmtRs(e.totalLimit)} (${limitPct}%)</div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
+    content.className = '';
+    content.innerHTML = `
+      <table class="due-table">
+        <thead>
+          <tr>
+            <th>Card</th>
+            <th>Person</th>
+            <th>Due date</th>
+            <th>Due</th>
+            <th>Paid</th>
+            <th>Pending</th>
+            <th>Status</th>
+            <th>Limit used</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map(e => {
+            const cls = classify(e);
+            const label = statusLabel(e, cls);
+            const limitPct = e.totalLimit > 0 ? Math.min(100, Math.round(((e.totalLimit - e.currentLimit) / e.totalLimit) * 100)) : null;
+            const limitText = e.totalLimit > 0 ? `${fmtRs(e.totalLimit - e.currentLimit)}/${fmtRs(e.totalLimit)} (${limitPct}%)` : '—';
+            return `
+              <tr class="${cls}">
+                <td>${escapeHtml(e.cardName || 'Unnamed')}</td>
+                <td>${escapeHtml(e.account)}</td>
+                <td class="num">${e.dueDateDisplay}</td>
+                <td class="num">${fmtRs(e.due)}</td>
+                <td class="num">${fmtRs(e.paid)}</td>
+                <td class="pending-cell ${e.pending <= 0 ? 'zero' : ''}">${fmtRs(e.pending)}</td>
+                <td class="status-cell ${cls}">${label}</td>
+                <td class="num">${limitText}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
   }
 
   document.getElementById('navTabs').addEventListener('click', (e) => {
