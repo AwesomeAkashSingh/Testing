@@ -4,6 +4,7 @@
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
   let allEntries = [];
+  let selectedPeople = new Set(); // empty set = "All"
 
   function parseCSV(text) {
     // Simple CSV parser handling quoted fields with commas
@@ -146,6 +147,7 @@
       });
 
       populatePersonFilter();
+      updatePersonButtonStyles();
       render();
       /* document.getElementById('updatedTag').textContent =
         'Fetched ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); */
@@ -158,23 +160,16 @@
   }
 
   function populatePersonFilter() {
-    const select = document.getElementById('personFilter');
-    const current = select.value;
+    const container = document.getElementById('personTabs');
     const people = [...new Set(allEntries.map(e => e.account).filter(Boolean))].sort();
-    select.innerHTML = '<option value="ALL">All people</option>' +
-      people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
-    if (people.includes(current)) select.value = current;
+    container.innerHTML = '<button class="person-btn active" data-person="ALL">All</button>' +
+      people.map(p => `<button class="person-btn" data-person="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('');
   }
 
   function render() {
-    const person = document.getElementById('personFilter').value;
-    const status = document.getElementById('statusFilter').value;
-
     const filtered = allEntries.filter(e => {
-      const cls = classify(e);
-      if (e.pending <= 0) return false;
-      if (person !== 'ALL' && e.account !== person) return false;
-      if (status !== 'ALL' && cls !== status) return false;
+      if (e.pending <= 0) return false; // hide fully paid entries
+      if (selectedPeople.size > 0 && !selectedPeople.has(e.account)) return false;
       return true;
     });
 
@@ -233,7 +228,46 @@
     }).join('');
   }
 
-  document.getElementById('personFilter').addEventListener('change', render);
-  document.getElementById('statusFilter').addEventListener('change', render);
+  document.getElementById('navTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn) return;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const tab = btn.dataset.tab;
+    document.getElementById('duesSection').style.display = tab === 'dues' ? '' : 'none';
+    document.getElementById('debitSection').style.display = tab === 'debit' ? '' : 'none';
+    document.getElementById('creditSection').style.display = tab === 'credit' ? '' : 'none';
+    document.getElementById('rewardsSection').style.display = tab === 'rewards' ? '' : 'none';
+  });
+
+  document.getElementById('personTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.person-btn');
+    if (!btn) return;
+    const person = btn.dataset.person;
+
+    if (person === 'ALL') {
+      selectedPeople.clear();
+    } else {
+      selectedPeople.delete('ALL');
+      if (selectedPeople.has(person)) {
+        selectedPeople.delete(person);
+      } else {
+        selectedPeople.add(person);
+      }
+      if (selectedPeople.size === 0) selectedPeople.clear(); // falls back to All look
+    }
+
+    updatePersonButtonStyles();
+    render();
+  });
+
+  function updatePersonButtonStyles() {
+    document.querySelectorAll('.person-btn').forEach(b => {
+      const p = b.dataset.person;
+      const isActive = p === 'ALL' ? selectedPeople.size === 0 : selectedPeople.has(p);
+      b.classList.toggle('active', isActive);
+    });
+  }
 
   loadData();
