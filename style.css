@@ -23,10 +23,11 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px 80px; }
 
   header {
-    padding: 48px 0 28px;
-    border-bottom: 2px solid var(--ink);
-    margin-bottom: 28px;
-  }
+  padding: 48px 0 28px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 28px;
+  text-align: center;
+}
   .eyebrow {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -101,16 +102,17 @@
   }
 
   .section-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-soft);
-    margin: 0 0 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
   .section-label::after {
     content: '';
     flex: 1;
@@ -119,10 +121,11 @@
   }
 
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-    gap: 14px;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+  justify-content: center;
+}
 
   .ticket {
     background: var(--card);
@@ -245,6 +248,7 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 24px;
+  justify-content: center;
 }
 .tab {
   font-family: 'IBM Plex Mono', monospace;
@@ -266,7 +270,9 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 24px;
+  justify-content: center;
 }
+
 .person-btn {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
