@@ -237,6 +237,7 @@
     document.getElementById('debitSection').style.display = tab === 'debit' ? '' : 'none';
     document.getElementById('creditSection').style.display = tab === 'credit' ? '' : 'none';
     document.getElementById('rewardsSection').style.display = tab === 'rewards' ? '' : 'none';
+    document.getElementById('maintenanceSection').style.display = tab === 'maintenance' ? '' : 'none';
   });
 
   document.getElementById('personTabs').addEventListener('click', (e) => {
