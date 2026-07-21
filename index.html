@@ -7,34 +7,38 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1 id="pageTitle">Cards and Benefits</h1>
-  </header>
 
-  <div class="nav-tabs" id="navTabs">
-    <button class="tab active" data-tab="dues">Dues</button>
-    <button class="tab" data-tab="debit">Debit cards</button>
-    <button class="tab" data-tab="credit">Credit cards</button>
-    <button class="tab" data-tab="rewards">Rewards</button>
+<div class="wrap">
+  <div class="band band-title">
+    <header>
+      <h1 id="pageTitle">Cards and Benefits</h1>
+    </header>
+  </div>
+
+  <div class="band band-nav">
+    <div class="nav-tabs" id="navTabs">
+      <button class="tab active" data-tab="dues">Dues</button>
+      <button class="tab" data-tab="debit">Debit cards</button>
+      <button class="tab" data-tab="credit">Credit cards</button>
+      <button class="tab" data-tab="rewards">Rewards</button>
+    </div>
   </div>
 
   <div id="duesSection">
-    <div class="stats-wrap"><div class="stats" id="stats"></div></div>
-
-    <div class="person-tabs" id="personTabs">
-      <button class="person-btn active" data-person="ALL">All</button>
+    <div class="band band-filter">
+      <div class="stats-wrap"><div class="stats" id="stats"></div></div>
+      <div class="person-tabs" id="personTabs" style="margin-top:20px;">
+        <button class="person-btn active" data-person="ALL">All</button>
+      </div>
     </div>
 
-    <div class="section-label">Entries</div>
-    <div id="content" class="loading">Loading dues…</div>
+    <div class="band band-entries">
+      <div class="section-label">Entries</div>
+      <div id="content" class="loading">Loading dues…</div>
+    </div>
   </div>
 
-  <div id="debitSection" class="tab-content" style="display:none;"></div>
-  <div id="creditSection" class="tab-content" style="display:none;"></div>
-  <div id="rewardsSection" class="tab-content" style="display:none;"></div>
+  <div id="debitSection" class="tab-content band band-nav" style="display:none;"></div>
+  <div id="creditSection" class="tab-content band band-nav" style="display:none;"></div>
+  <div id="rewardsSection" class="tab-content band band-nav" style="display:none;"></div>
 </div>
-
-<script src="app.js" defer></script>
-</body>
-</html>
