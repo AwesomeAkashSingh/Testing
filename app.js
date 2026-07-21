@@ -331,6 +331,7 @@
         const cardName = (r[2] || '').trim();  // C: Card name
         const ending = (r[3] || '').trim();    // D: Ending
         const updatedOn = (r[8] || '').trim(); // I: Updated on
+        const statement = (r[9] || '').trim(); // J: Statement
         const dueDaysRaw = (r[10] || '').trim(); // K: Due days
         const totalLimit = parseNumber(r[11]); // L: Total limit
         const currentLimit = parseNumber(r[12]); // M: Current limit
@@ -341,7 +342,7 @@
         if (!(currentLimit < totalLimit)) return;
 
         if (!dueDaysRaw) {
-          results.push({ account, cardName, ending, updatedOn, totalLimit, currentLimit, nearestDate: null });
+          results.push({ account, cardName, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit });
           return;
         }
 
@@ -349,7 +350,7 @@
         if (!nearest) return;
         const daysAway = Math.round((nearest - today) / 86400000);
         if (daysAway >= 0 && daysAway <= 15) {
-          results.push({ account, cardName, ending, updatedOn, totalLimit, currentLimit, nearestDate: nearest });
+          results.push({ account, cardName, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit });
         }
       });
 
@@ -359,16 +360,32 @@
       }
 
       section.innerHTML = `
-        <ol class="task-list">
-          ${results.map(e => `
-            <li>
-              ${escapeHtml(e.account)} — ${escapeHtml(e.cardName)} (${escapeHtml(e.ending)})<br>
-              <span style="color:var(--ink-soft); font-size:12px;">
-                Updated on ${escapeHtml(e.updatedOn)} · Limit ${fmtRs(e.currentLimit)}/${fmtRs(e.totalLimit)}
-              </span>
-            </li>
-          `).join('')}
-        </ol>
+        <table class="due-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Card name</th>
+              <th>Ending</th>
+              <th>Statement</th>
+              <th>Due days</th>
+              <th>Updated on</th>
+              <th>Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${results.map(e => `
+              <tr>
+                <td>${escapeHtml(e.account)}</td>
+                <td>${escapeHtml(e.cardName)}</td>
+                <td class="num">${escapeHtml(e.ending)}</td>
+                <td class="num">${escapeHtml(e.statement || '—')}</td>
+                <td class="num">${escapeHtml(e.dueDaysRaw || '—')}</td>
+                <td class="num">${escapeHtml(e.updatedOn)}</td>
+                <td class="num">${fmtRs(e.currentLimit)}/${fmtRs(e.totalLimit)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
       `;
     } catch (err) {
       section.innerHTML = '<div class="err">Could not check limits.<br><br>' + escapeHtml(err.message) + '</div>';
