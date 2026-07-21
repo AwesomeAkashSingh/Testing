@@ -1,7 +1,9 @@
-  // ── Configure your sheet here ──
+// ── Configure your sheet here ──
   const SHEET_ID = '1q4EhX1RNMWXooqszhMz_X9if9Qyj3zRZ-8BcXwHLy7Y';
   const SHEET_NAME = 'Sheet1';
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+  const MAINTENANCE_SHEET_NAME = 'Maintenance';
+  const MAINTENANCE_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(MAINTENANCE_SHEET_NAME)}`;
 
   let allEntries = [];
   let selectedPeople = new Set(); // empty set = "All"
@@ -269,4 +271,31 @@
     });
   }
 
+  async function loadMaintenanceTasks() {
+    const section = document.getElementById('maintenanceSection');
+    section.innerHTML = '<div class="loading">Loading tasks…</div>';
+
+    try {
+      const res = await fetch(MAINTENANCE_CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const tasks = rows.slice(1).map(r => (r[0] || '').trim()).filter(Boolean);
+
+      if (!tasks.length) {
+        section.innerHTML = '<div class="empty">No pending tasks.</div>';
+        return;
+      }
+
+      section.innerHTML = `
+        <ol class="task-list">
+          ${tasks.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+        </ol>
+      `;
+    } catch (err) {
+      section.innerHTML = '<div class="err">Could not load tasks.<br><br>' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
   loadData();
+  loadMaintenanceTasks();
