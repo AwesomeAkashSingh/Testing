@@ -272,7 +272,7 @@
   }
 
   async function loadMaintenanceTasks() {
-    const section = document.getElementById('maintenanceSection');
+    const section = document.getElementById('maintenanceTasks');
     section.innerHTML = '<div class="loading">Loading tasks…</div>';
 
     try {
@@ -297,5 +297,84 @@
     }
   }
 
+  function nearestUpcomingDayOfMonth(dayNum) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), dayNum);
+    if (thisMonth >= today) return thisMonth;
+    return new Date(today.getFullYear(), today.getMonth() + 1, dayNum);
+  }
+
+  function nearestDueDaysDate(dueDaysRaw) {
+    if (!dueDaysRaw) return null;
+    const days = String(dueDaysRaw).split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 1 && n <= 31);
+    if (!days.length) return null;
+    const dates = days.map(nearestUpcomingDayOfMonth);
+    return dates.reduce((a, b) => (a < b ? a : b));
+  }
+
+  async function loadLimitCheck() {
+    const section = document.getElementById('limitCheck');
+    section.innerHTML = '<div class="loading">Checking limits…</div>';
+
+    try {
+      const res = await fetch(CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const dataRows = rows.slice(1);
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const results = [];
+
+      dataRows.forEach(r => {
+        const account = (r[0] || '').trim();   // A: Name
+        const cardName = (r[2] || '').trim();  // C: Card name
+        const ending = (r[3] || '').trim();    // D: Ending
+        const updatedOn = (r[8] || '').trim(); // I: Updated on
+        const dueDaysRaw = (r[10] || '').trim(); // K: Due days
+        const totalLimit = parseNumber(r[11]); // L: Total limit
+        const currentLimit = parseNumber(r[12]); // M: Current limit
+        const sharedLimit = (r[13] || '').trim().toLowerCase(); // N: Shared limit
+
+        if (!account && !cardName) return;
+        if (sharedLimit === 'yes') return;
+        if (!(currentLimit < totalLimit)) return;
+
+        if (!dueDaysRaw) {
+          results.push({ account, cardName, ending, updatedOn, totalLimit, currentLimit, nearestDate: null });
+          return;
+        }
+
+        const nearest = nearestDueDaysDate(dueDaysRaw);
+        if (!nearest) return;
+        const daysAway = Math.round((nearest - today) / 86400000);
+        if (daysAway >= 0 && daysAway <= 15) {
+          results.push({ account, cardName, ending, updatedOn, totalLimit, currentLimit, nearestDate: nearest });
+        }
+      });
+
+      if (!results.length) {
+        section.innerHTML = '<div class="empty">No cards need attention.</div>';
+        return;
+      }
+
+      section.innerHTML = `
+        <ol class="task-list">
+          ${results.map(e => `
+            <li>
+              ${escapeHtml(e.account)} — ${escapeHtml(e.cardName)} (${escapeHtml(e.ending)})<br>
+              <span style="color:var(--ink-soft); font-size:12px;">
+                Updated on ${escapeHtml(e.updatedOn)} · Limit ${fmtRs(e.currentLimit)}/${fmtRs(e.totalLimit)}
+              </span>
+            </li>
+          `).join('')}
+        </ol>
+      `;
+    } catch (err) {
+      section.innerHTML = '<div class="err">Could not check limits.<br><br>' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
   loadData();
   loadMaintenanceTasks();
+  loadLimitCheck();
