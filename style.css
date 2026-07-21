@@ -370,3 +370,16 @@ header {
   border: 1.5px dashed var(--line);
   border-radius: 4px;
 }
+
+.task-list {
+  max-width: 600px;
+  margin: 0 auto;
+  padding-left: 24px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.task-list li {
+  margin-bottom: 8px;
+}
