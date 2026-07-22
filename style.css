@@ -406,6 +406,17 @@ header {
 #maintenanceSection .maint-table tbody tr {
   background: var(--m-bg1);
 }
+
 #maintenanceSection .maint-table td, #maintenanceSection .maint-table th {
   border-color: #c9b8e0;
+}
+#maintenanceSection .flag-unpaid {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--overdue);
+  color: #fff;
 }
