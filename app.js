@@ -328,6 +328,7 @@
 
       dataRows.forEach(r => {
         const account = (r[0] || '').trim();   // A: Name
+        const bank = (r[1] || '').trim();      // B: Bank
         const cardName = (r[2] || '').trim();  // C: Card name
         const ending = (r[3] || '').trim();    // D: Ending
         const updatedOn = (r[8] || '').trim(); // I: Updated on
@@ -335,22 +336,16 @@
         const dueDaysRaw = (r[10] || '').trim(); // K: Due days
         const totalLimit = parseNumber(r[11]); // L: Total limit
         const currentLimit = parseNumber(r[12]); // M: Current limit
-        const sharedLimit = (r[13] || '').trim().toLowerCase(); // N: Shared limit
 
         if (!account && !cardName) return;
-        if (sharedLimit === 'yes') return;
-        if (!(currentLimit < totalLimit)) return;
-
-        if (!dueDaysRaw) {
-          results.push({ account, cardName, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit });
-          return;
-        }
+        if (!dueDaysRaw) return;
 
         const nearest = nearestDueDaysDate(dueDaysRaw);
         if (!nearest) return;
         const daysAway = Math.round((nearest - today) / 86400000);
-        if (daysAway >= 0 && daysAway <= 15) {
-          results.push({ account, cardName, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit });
+        if (daysAway >= 0 && daysAway <= 7) {
+          const difference = totalLimit - currentLimit;
+          results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference });
         }
       });
 
@@ -360,33 +355,38 @@
       }
 
       section.innerHTML = `
-        <table class="due-table">
+        <table class="due-table maint-table">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Card name</th>
+              <th>Bank</th>
               <th>Ending</th>
+              <th>Updated on</th>
               <th>Statement</th>
               <th>Due days</th>
-              <th>Updated on</th>
-              <th>Limit</th>
+              <th>Total limit</th>
+              <th>Current limit</th>
+              <th>Difference</th>
             </tr>
           </thead>
           <tbody>
             ${results.map(e => `
               <tr>
                 <td>${escapeHtml(e.account)}</td>
-                <td>${escapeHtml(e.cardName)}</td>
+                <td>${escapeHtml(e.bank)}</td>
                 <td class="num">${escapeHtml(e.ending)}</td>
-                <td class="num">${escapeHtml(e.statement || '—')}</td>
-                <td class="num">${escapeHtml(e.dueDaysRaw || '—')}</td>
                 <td class="num">${escapeHtml(e.updatedOn)}</td>
-                <td class="num">${fmtRs(e.currentLimit)}/${fmtRs(e.totalLimit)}</td>
+                <td class="num">${escapeHtml(e.statement || '—')}</td>
+                <td class="num">${escapeHtml(e.dueDaysRaw)}</td>
+                <td class="num">${fmtRs(e.totalLimit)}</td>
+                <td class="num">${fmtRs(e.currentLimit)}</td>
+                <td class="num">${fmtRs(e.difference)}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
       `;
+      
     } catch (err) {
       section.innerHTML = '<div class="err">Could not check limits.<br><br>' + escapeHtml(err.message) + '</div>';
     }
