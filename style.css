@@ -383,3 +383,29 @@ header {
 .task-list li {
   margin-bottom: 8px;
 }
+
+/* Maintenance tab — distinct palette */
+#maintenanceSection {
+  --m-bg1: #f1ecf9;
+  --m-bg2: #e4d9f5;
+  --m-accent: #5b2a86;
+  --m-accent-dark: #2e1a45;
+}
+#maintenanceSection .band-filter,
+#maintenanceSection .band-entries {
+  background: var(--m-bg1);
+}
+#maintenanceSection .band-filter { background: var(--m-bg2); }
+#maintenanceSection .section-label { color: var(--m-accent); }
+#maintenanceSection .section-label::after { background: var(--m-accent); opacity: 0.3; }
+#maintenanceSection .task-list li { color: var(--m-accent-dark); }
+#maintenanceSection .maint-table thead th {
+  background: var(--m-accent-dark);
+  color: #f1ecf9;
+}
+#maintenanceSection .maint-table tbody tr {
+  background: var(--m-bg1);
+}
+#maintenanceSection .maint-table td, #maintenanceSection .maint-table th {
+  border-color: #c9b8e0;
+}
