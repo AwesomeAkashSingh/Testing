@@ -331,6 +331,7 @@
         const bank = (r[1] || '').trim();      // B: Bank
         const cardName = (r[2] || '').trim();  // C: Card name
         const ending = (r[3] || '').trim();    // D: Ending
+        const dueDateRaw = parseDate(r[4]);    // E: Due date
         const due = parseNumber(r[5]);         // F: Due (Rs.)
         const paid = parseNumber(r[6]);        // G: Paid (Rs.)
         const updatedOn = (r[8] || '').trim(); // I: Updated on
@@ -355,7 +356,7 @@
         const isSettled = paid === due;
         if (difference <= 0 && isSettled) return; // fully maxed out AND fully paid → nothing to act on
 
-        results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference, nearestDate: nearest, isUnpaid });
+        results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference, nearestDate: nearest, isUnpaid, dueDateDisplay: fmtDate(dueDateRaw), due, paid });
       });
 
       results.sort((a, b) => a.nearestDate - b.nearestDate);
@@ -373,6 +374,9 @@
               <th>Bank</th>
               <th>Ending</th>
               <th>Updated on</th>
+              <th>Due date</th>
+              <th>Due</th>
+              <th>Paid</th>
               <th>Statement</th>
               <th>Due days</th>
               <th>Total limit</th>
@@ -388,6 +392,9 @@
                 <td>${escapeHtml(e.bank)}</td>
                 <td class="num">${escapeHtml(e.ending)}</td>
                 <td class="num">${escapeHtml(e.updatedOn)}</td>
+                <td class="num">${escapeHtml(e.dueDateDisplay)}</td>
+                <td class="num">${fmtRs(e.due)}</td>
+                <td class="num">${fmtRs(e.paid)}</td>
                 <td class="num">${escapeHtml(e.statement || '—')}</td>
                 <td class="num">${escapeHtml(e.dueDaysRaw)}</td>
                 <td class="num">${fmtRs(e.totalLimit)}</td>
