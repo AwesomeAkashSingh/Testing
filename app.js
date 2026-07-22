@@ -331,6 +331,8 @@
         const bank = (r[1] || '').trim();      // B: Bank
         const cardName = (r[2] || '').trim();  // C: Card name
         const ending = (r[3] || '').trim();    // D: Ending
+        const due = parseNumber(r[5]);         // F: Due (Rs.)
+        const paid = parseNumber(r[6]);        // G: Paid (Rs.)
         const updatedOn = (r[8] || '').trim(); // I: Updated on
         const statement = (r[9] || '').trim(); // J: Statement
         const dueDaysRaw = (r[10] || '').trim(); // K: Due days
@@ -343,11 +345,16 @@
         const nearest = nearestDueDaysDate(dueDaysRaw);
         if (!nearest) return;
         const daysAway = Math.round((nearest - today) / 86400000);
-        if (daysAway >= 0 && daysAway <= 7) {
-          const difference = totalLimit - currentLimit;
-          results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference });
-        }
+        if (daysAway < 0 || daysAway > 7) return;
+
+        const difference = totalLimit - currentLimit;
+        const isSettled = paid === due;
+        if (difference <= 0 && isSettled) return; // fully maxed out AND fully paid → nothing to act on
+
+        results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference, nearestDate: nearest });
       });
+
+      results.sort((a, b) => a.nearestDate - b.nearestDate);
 
       if (!results.length) {
         section.innerHTML = '<div class="empty">No cards need attention.</div>';
