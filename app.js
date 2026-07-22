@@ -345,13 +345,17 @@
         const nearest = nearestDueDaysDate(dueDaysRaw);
         if (!nearest) return;
         const daysAway = Math.round((nearest - today) / 86400000);
-        if (daysAway < 0 || daysAway > 7) return;
+
+        const isUpcoming = daysAway >= 0 && daysAway <= 7;
+        const isUnpaid = due > paid;
+
+        if (!isUpcoming && !isUnpaid) return; // neither due soon nor unpaid → skip
 
         const difference = totalLimit - currentLimit;
         const isSettled = paid === due;
         if (difference <= 0 && isSettled) return; // fully maxed out AND fully paid → nothing to act on
 
-        results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference, nearestDate: nearest });
+        results.push({ account, bank, ending, statement, dueDaysRaw, updatedOn, totalLimit, currentLimit, difference, nearestDate: nearest, isUnpaid });
       });
 
       results.sort((a, b) => a.nearestDate - b.nearestDate);
@@ -374,6 +378,7 @@
               <th>Total limit</th>
               <th>Current limit</th>
               <th>Difference</th>
+              <th>Flag</th>
             </tr>
           </thead>
           <tbody>
@@ -388,6 +393,7 @@
                 <td class="num">${fmtRs(e.totalLimit)}</td>
                 <td class="num">${fmtRs(e.currentLimit)}</td>
                 <td class="num">${fmtRs(e.difference)}</td>
+                <td class="num">${e.isUnpaid ? '<span class="flag-unpaid">Unpaid</span>' : ''}</td>
               </tr>
             `).join('')}
           </tbody>
