@@ -1,6 +1,6 @@
 // ── Configure your sheet here ──
   const SHEET_ID = '1q4EhX1RNMWXooqszhMz_X9if9Qyj3zRZ-8BcXwHLy7Y';
-  const SHEET_NAME = 'CC';
+  const SHEET_NAME = 'CC dues';
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
   const MAINTENANCE_SHEET_NAME = 'Maintenance';
   const MAINTENANCE_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(MAINTENANCE_SHEET_NAME)}`;
