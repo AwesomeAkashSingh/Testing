@@ -412,6 +412,102 @@
     }
   }
 
+async function loadRecheckEntries() {
+    const section = document.getElementById('recheckEntries');
+    section.innerHTML = '<div class="loading">Checking for stale entries…</div>';
+
+    try {
+      const res = await fetch(CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const dataRows = rows.slice(1);
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const results = [];
+
+      dataRows.forEach(r => {
+        const account = (r[0] || '').trim();
+        const bank = (r[1] || '').trim();
+        const cardName = (r[2] || '').trim();
+        const ending = (r[3] || '').trim();
+        const dueDateRaw = parseDate(r[4]);
+        const due = parseNumber(r[5]);
+        const paid = parseNumber(r[6]);
+        const updatedOn = (r[8] || '').trim();
+        const statement = (r[9] || '').trim();
+        const dueDaysRaw = (r[10] || '').trim();
+        const totalLimit = parseNumber(r[11]);
+        const currentLimit = parseNumber(r[12]);
+
+        if (!account && !cardName) return;
+        if (!dueDateRaw) return;
+        if (dueDateRaw > today) return;
+
+        const difference = totalLimit - currentLimit;
+        const isUnpaid = Math.round(due * 100) > Math.round(paid * 100);
+
+        results.push({
+          account, bank, ending, updatedOn,
+          dueDateDisplay: fmtDate(dueDateRaw), due, paid,
+          statement, dueDaysRaw, totalLimit, currentLimit, difference, isUnpaid,
+          dueDateRaw
+        });
+      });
+
+      if (!results.length) {
+        section.innerHTML = '<div class="empty">No stale entries found.</div>';
+        return;
+      }
+
+      results.sort((a, b) => a.dueDateRaw - b.dueDateRaw);
+
+      section.innerHTML = `
+        <table class="due-table recheck-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Bank</th>
+              <th>Ending</th>
+              <th>Updated on</th>
+              <th>Due date</th>
+              <th>Due</th>
+              <th>Paid</th>
+              <th>Statement</th>
+              <th>Due days</th>
+              <th>Total limit</th>
+              <th>Current limit</th>
+              <th>Difference</th>
+              <th>Flag</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${results.map(e => `
+              <tr>
+                <td>${escapeHtml(e.account)}</td>
+                <td>${escapeHtml(e.bank)}</td>
+                <td class="num">${escapeHtml(e.ending)}</td>
+                <td class="num">${escapeHtml(e.updatedOn)}</td>
+                <td class="num">${escapeHtml(e.dueDateDisplay)}</td>
+                <td class="num">${fmtRs(e.due)}</td>
+                <td class="num">${fmtRs(e.paid)}</td>
+                <td class="num">${escapeHtml(e.statement || '—')}</td>
+                <td class="num">${escapeHtml(e.dueDaysRaw || '—')}</td>
+                <td class="num">${fmtRs(e.totalLimit)}</td>
+                <td class="num">${fmtRs(e.currentLimit)}</td>
+                <td class="num">${fmtRs(e.difference)}</td>
+                <td class="num">${e.isUnpaid ? '<span class="flag-unpaid">Unpaid</span>' : ''}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (err) {
+      section.innerHTML = '<div class="err">Could not check entries.<br><br>' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
   loadData();
   loadMaintenanceTasks();
   loadLimitCheck();
+  loadRecheckEntries();
