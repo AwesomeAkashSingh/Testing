@@ -410,6 +410,29 @@ header {
 #maintenanceSection .maint-table td, #maintenanceSection .maint-table th {
   border-color: #c9b8e0;
 }
+
+#maintenanceSection .band-recheck {
+  background: #3d1f1f;
+}
+#maintenanceSection .band-recheck .section-label {
+  color: #f5c9c9;
+}
+#maintenanceSection .band-recheck .section-label::after {
+  background: #f5c9c9;
+  opacity: 0.3;
+}
+#maintenanceSection .recheck-table thead th {
+  background: #5c2626;
+  color: #fbeaea;
+}
+#maintenanceSection .recheck-table tbody tr {
+  background: #4a2020;
+  color: #fbeaea;
+}
+#maintenanceSection .recheck-table td, #maintenanceSection .recheck-table th {
+  border-color: #6e3838;
+}
+
 #maintenanceSection .flag-unpaid {
   display: inline-block;
   font-family: 'IBM Plex Mono', monospace;
