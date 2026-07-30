@@ -433,6 +433,28 @@ header {
   border-color: #6e3838;
 }
 
+#maintenanceSection .band-stale-check {
+  background: #1f3d2e;
+}
+#maintenanceSection .band-stale-check .section-label {
+  color: #b8e6c9;
+}
+#maintenanceSection .band-stale-check .section-label::after {
+  background: #b8e6c9;
+  opacity: 0.3;
+}
+#maintenanceSection .stale-check-table thead th {
+  background: #2a5c40;
+  color: #eafbf1;
+}
+#maintenanceSection .stale-check-table tbody tr {
+  background: #204a34;
+  color: #eafbf1;
+}
+#maintenanceSection .stale-check-table td, #maintenanceSection .stale-check-table th {
+  border-color: #3a6e50;
+}
+
 #maintenanceSection .flag-unpaid {
   display: inline-block;
   font-family: 'IBM Plex Mono', monospace;
