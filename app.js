@@ -238,6 +238,7 @@
     document.getElementById('duesSection').style.display = tab === 'dues' ? '' : 'none';
     document.getElementById('debitSection').style.display = tab === 'debit' ? '' : 'none';
     document.getElementById('creditSection').style.display = tab === 'credit' ? '' : 'none';
+    document.getElementById('customisedSection').style.display = tab === 'customised' ? '' : 'none';
     document.getElementById('rewardsSection').style.display = tab === 'rewards' ? '' : 'none';
     document.getElementById('maintenanceSection').style.display = tab === 'maintenance' ? '' : 'none';
   });
