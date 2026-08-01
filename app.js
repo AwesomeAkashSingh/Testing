@@ -693,47 +693,74 @@ async function loadRecheckEntries() {
       banks.map(b => `<button class="person-btn" data-bank="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
   }
 
+  const STMT_BUCKET_DEFS = [
+    { key: 'today', label: 'Today' },
+    { key: 'upcoming5', label: 'Upcoming 1-5d' },
+    { key: 'upcoming10', label: 'Upcoming 6-10d' },
+    { key: 'finished5', label: 'Finished 1-5d ago' },
+    { key: 'finished15', label: 'Finished 6-15d ago' },
+    { key: 'others', label: 'Others' }
+  ];
+  let openBuckets = new Set();
+
   function renderStatementGroups() {
     const groupsEl = document.getElementById('statementCycleGroups');
     const filtered = statementEntries.filter(e => selectedBank === 'ALL' || e.bank === selectedBank);
 
-    const BUCKET_DEFS = [
-      { key: 'today', label: 'Today' },
-      { key: 'upcoming5', label: 'Upcoming — next 5 days' },
-      { key: 'upcoming10', label: 'Upcoming — 6 to 10 days' },
-      { key: 'finished5', label: 'Finished — last 5 days' },
-      { key: 'finished15', label: 'Finished — 6 to 15 days ago' },
-      { key: 'others', label: 'Others' }
-    ];
+    const tilesHtml = `
+      <div class="stmt-tile-grid">
+        ${STMT_BUCKET_DEFS.map(def => {
+          const count = filtered.filter(e => e.bucket === def.key).length;
+          const isOpen = openBuckets.has(def.key);
+          return `
+            <button class="stmt-tile ${isOpen ? 'open' : ''}" data-bucket="${def.key}">
+              <div class="stmt-tile-label">${def.label}</div>
+              <div class="stmt-tile-count">${count}</div>
+            </button>
+          `;
+        }).join('')}
+      </div>
+    `;
 
-    const groupsHtml = BUCKET_DEFS.map(def => {
-      const entries = filtered.filter(e => e.bucket === def.key);
-      if (!entries.length) return '';
-      return `
-        <div class="stmt-group bucket-${def.key}">
-          <div class="stmt-group-header">${def.label} <span class="stmt-count">${entries.length}</span></div>
-          <table class="due-table stmt-table">
-            <thead>
-              <tr><th>Name</th><th>Bank</th><th>Card name</th><th>Ending</th><th>Statement</th><th>Due days</th></tr>
-            </thead>
-            <tbody>
-              ${entries.map(e => `
-                <tr>
-                  <td>${escapeHtml(e.account)}</td>
-                  <td>${escapeHtml(e.bank)}</td>
-                  <td>${escapeHtml(e.cardName)}</td>
-                  <td class="num">${escapeHtml(e.ending)}</td>
-                  <td class="num">${escapeHtml(e.statementRaw || '—')}${e.isMulti ? ' <span class="multi-tag">multi</span>' : ''}</td>
-                  <td class="num">${escapeHtml(e.dueDaysRaw || '—')}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }).join('');
+    const panelsHtml = STMT_BUCKET_DEFS
+      .filter(def => openBuckets.has(def.key))
+      .map(def => {
+        const entries = filtered.filter(e => e.bucket === def.key);
+        if (!entries.length) return `<div class="stmt-panel"><div class="empty">No entries.</div></div>`;
 
-    groupsEl.innerHTML = groupsHtml || '<div class="empty">No entries match this filter.</div>';
+        const groups = {};
+        entries.forEach(e => {
+          const sig = `${e.statementRaw || '—'}|${e.dueDaysRaw || '—'}`;
+          if (!groups[sig]) groups[sig] = { statementRaw: e.statementRaw, dueDaysRaw: e.dueDaysRaw, isMulti: e.isMulti, items: [] };
+          groups[sig].items.push(e);
+        });
+
+        const rowsHtml = Object.values(groups).map(g => `
+          <div class="stmt-panel-row">
+            <div class="stmt-panel-meta">
+              Statement ${escapeHtml(g.statementRaw || '—')} · Due days ${escapeHtml(g.dueDaysRaw || '—')}
+              ${g.isMulti ? '<span class="multi-tag">multi</span>' : ''}
+              <span class="cnt">${g.items.length} card${g.items.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="stmt-chips">
+              ${g.items.map(i => `<span class="stmt-chip">${escapeHtml(i.account)} · ${escapeHtml(i.cardName)} (${escapeHtml(i.ending)})</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        return `<div class="stmt-panel">${rowsHtml}</div>`;
+      }).join('');
+
+    groupsEl.innerHTML = tilesHtml + panelsHtml;
+
+    groupsEl.querySelectorAll('.stmt-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        const key = tile.dataset.bucket;
+        if (openBuckets.has(key)) openBuckets.delete(key);
+        else openBuckets.add(key);
+        renderStatementGroups();
+      });
+    });
   }
 
   document.getElementById('custBankTabs').addEventListener('click', (e) => {
