@@ -481,21 +481,74 @@ header {
   border-color: var(--c-accent);
   color: #fff;
 }
-#customisedSection .stmt-group { margin-bottom: 28px; }
-#customisedSection .stmt-group-header {
+#customisedSection .stmt-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+#customisedSection .stmt-tile {
+  background: var(--card);
+  border: 1.5px solid var(--c-accent);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
   font-family: 'IBM Plex Mono', monospace;
+}
+#customisedSection .stmt-tile.open {
+  background: var(--c-accent);
+}
+#customisedSection .stmt-tile.open .stmt-tile-label,
+#customisedSection .stmt-tile.open .stmt-tile-count {
+  color: #fff;
+}
+#customisedSection .stmt-tile-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--c-accent-dark);
+  margin-bottom: 4px;
+}
+#customisedSection .stmt-tile-count {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--c-accent);
+}
+#customisedSection .stmt-panel {
+  background: var(--c-bg2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+#customisedSection .stmt-panel-row {
+  margin-bottom: 12px;
+}
+#customisedSection .stmt-panel-row:last-child { margin-bottom: 0; }
+#customisedSection .stmt-panel-meta {
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--c-accent-dark);
-  margin-bottom: 8px;
-  padding: 6px 10px;
-  background: var(--c-bg2);
-  border-left: 4px solid var(--c-accent);
-  border-radius: 3px;
+  margin-bottom: 6px;
 }
-#customisedSection .stmt-count { font-weight: 400; color: var(--c-accent); }
+#customisedSection .stmt-panel-meta .cnt {
+  font-weight: 400;
+  color: var(--c-accent);
+  margin-left: 6px;
+}
+#customisedSection .stmt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#customisedSection .stmt-chip {
+  background: var(--card);
+  border: 1px solid var(--c-accent);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+}
 #customisedSection .multi-tag {
   display: inline-block;
   font-size: 9px;
