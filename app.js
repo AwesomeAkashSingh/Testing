@@ -7,6 +7,8 @@
 
   let allEntries = [];
   let selectedPeople = new Set(); // empty set = "All"
+  let statementEntries = [];
+  let selectedBank = 'ALL';
 
   function parseCSV(text) {
     // Simple CSV parser handling quoted fields with commas
@@ -605,8 +607,147 @@ async function loadRecheckEntries() {
     }
   }
 
+  function parseDayList(raw) {
+    if (!raw) return [];
+    return String(raw).split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 1 && n <= 31);
+  }
+
+  function signedNearestDayDistance(dayNum, today) {
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const candidates = [
+      new Date(year, month - 1, dayNum),
+      new Date(year, month, dayNum),
+      new Date(year, month + 1, dayNum)
+    ];
+    let best = null;
+    candidates.forEach(c => {
+      const diff = Math.round((c - today) / 86400000);
+      if (best === null || Math.abs(diff) < Math.abs(best)) best = diff;
+    });
+    return best;
+  }
+
+  function farthestStatementDistance(values, today) {
+    if (!values.length) return null;
+    let farthest = null;
+    values.forEach(v => {
+      const d = signedNearestDayDistance(v, today);
+      if (farthest === null || Math.abs(d) > Math.abs(farthest)) farthest = d;
+    });
+    return farthest;
+  }
+
+  function classifyStatementDistance(distance) {
+    if (distance === null) return 'others';
+    if (distance === 0) return 'today';
+    if (distance >= -5 && distance <= -1) return 'finished5';
+    if (distance >= -15 && distance <= -6) return 'finished15';
+    if (distance >= 1 && distance <= 5) return 'upcoming5';
+    if (distance >= 6 && distance <= 10) return 'upcoming10';
+    return 'others';
+  }
+
+  async function loadStatementCycle() {
+    const groupsEl = document.getElementById('statementCycleGroups');
+    groupsEl.innerHTML = '<div class="loading">Loading statement cycles…</div>';
+
+    try {
+      const res = await fetch(CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const dataRows = rows.slice(1);
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      statementEntries = [];
+
+      dataRows.forEach(r => {
+        const account = (r[0] || '').trim();
+        const bank = (r[1] || '').trim();
+        const cardName = (r[2] || '').trim();
+        const ending = (r[3] || '').trim();
+        const statementRaw = (r[9] || '').trim();
+        const dueDaysRaw = (r[10] || '').trim();
+
+        if (!account && !cardName) return;
+
+        const values = parseDayList(statementRaw);
+        const distance = farthestStatementDistance(values, today);
+        const bucket = classifyStatementDistance(distance);
+
+        statementEntries.push({ account, bank, cardName, ending, statementRaw, dueDaysRaw, bucket, isMulti: values.length > 1 });
+      });
+
+      populateBankFilter();
+      renderStatementGroups();
+    } catch (err) {
+      groupsEl.innerHTML = '<div class="err">Could not load statement data.<br><br>' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
+  function populateBankFilter() {
+    const container = document.getElementById('custBankTabs');
+    const banks = [...new Set(statementEntries.map(e => e.bank).filter(Boolean))].sort();
+    container.innerHTML = '<button class="person-btn active" data-bank="ALL">All</button>' +
+      banks.map(b => `<button class="person-btn" data-bank="${escapeHtml(b)}">${escapeHtml(b)}</button>`).join('');
+  }
+
+  function renderStatementGroups() {
+    const groupsEl = document.getElementById('statementCycleGroups');
+    const filtered = statementEntries.filter(e => selectedBank === 'ALL' || e.bank === selectedBank);
+
+    const BUCKET_DEFS = [
+      { key: 'today', label: 'Today' },
+      { key: 'upcoming5', label: 'Upcoming — next 5 days' },
+      { key: 'upcoming10', label: 'Upcoming — 6 to 10 days' },
+      { key: 'finished5', label: 'Finished — last 5 days' },
+      { key: 'finished15', label: 'Finished — 6 to 15 days ago' },
+      { key: 'others', label: 'Others' }
+    ];
+
+    const groupsHtml = BUCKET_DEFS.map(def => {
+      const entries = filtered.filter(e => e.bucket === def.key);
+      if (!entries.length) return '';
+      return `
+        <div class="stmt-group bucket-${def.key}">
+          <div class="stmt-group-header">${def.label} <span class="stmt-count">${entries.length}</span></div>
+          <table class="due-table stmt-table">
+            <thead>
+              <tr><th>Name</th><th>Bank</th><th>Card name</th><th>Ending</th><th>Statement</th><th>Due days</th></tr>
+            </thead>
+            <tbody>
+              ${entries.map(e => `
+                <tr>
+                  <td>${escapeHtml(e.account)}</td>
+                  <td>${escapeHtml(e.bank)}</td>
+                  <td>${escapeHtml(e.cardName)}</td>
+                  <td class="num">${escapeHtml(e.ending)}</td>
+                  <td class="num">${escapeHtml(e.statementRaw || '—')}${e.isMulti ? ' <span class="multi-tag">multi</span>' : ''}</td>
+                  <td class="num">${escapeHtml(e.dueDaysRaw || '—')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }).join('');
+
+    groupsEl.innerHTML = groupsHtml || '<div class="empty">No entries match this filter.</div>';
+  }
+
+  document.getElementById('custBankTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.person-btn');
+    if (!btn) return;
+    document.querySelectorAll('#custBankTabs .person-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedBank = btn.dataset.bank;
+    renderStatementGroups();
+  });
+
   loadData();
   loadMaintenanceTasks();
   loadLimitCheck();
   loadRecheckEntries();
   loadStaleCheckEntries();
+  loadStatementCycle();
