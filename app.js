@@ -829,14 +829,14 @@ async function loadRecheckEntries() {
           <tbody>
             ${cards.map((c, i) => `
               <tr>
-                <td>${escapeHtml(c.cardName)}</td>
-                <td class="num card-number-cell">
+                <td data-label="Card name">${escapeHtml(c.cardName)}</td>
+                <td class="num card-number-cell" data-label="Card number">
                   <span class="card-number-value">${escapeHtml(c.cardNumber)}</span>
                   <button class="copy-btn" data-index="${i}">Copy</button>
                 </td>
-                <td class="num">${escapeHtml(c.expiry)}</td>
-                <td class="num">${escapeHtml(c.cvv)}</td>
-                <td>${escapeHtml(c.owner)}</td>
+                <td class="num" data-label="Expiry">${escapeHtml(c.expiry)}</td>
+                <td class="num" data-label="CVV">${escapeHtml(c.cvv)}</td>
+                <td data-label="Owner">${escapeHtml(c.owner)}</td>
               </tr>
             `).join('')}
           </tbody>
