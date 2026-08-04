@@ -562,19 +562,16 @@ header {
 }
 
 #creditSection .band-credit { background: var(--card); }
-
-.cc-table { table-layout: auto; }
-
-.cc-table td.card-number-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  white-space: normal;
-}
+.cc-table { table-layout: fixed; }
+.cc-table th:nth-child(1), .cc-table td:nth-child(1) { width: 24%; }
+.cc-table th:nth-child(2), .cc-table td:nth-child(2) { width: 24%; }
+.cc-table th:nth-child(3), .cc-table td:nth-child(3) { width: 14%; }
+.cc-table th:nth-child(4), .cc-table td:nth-child(4) { width: 10%; }
+.cc-table th:nth-child(5), .cc-table td:nth-child(5) { width: 18%; }
 .cc-table .card-number-value {
   font-family: 'IBM Plex Mono', monospace;
-  word-break: break-word;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 .cc-table .copy-btn {
   font-family: 'IBM Plex Mono', monospace;
@@ -585,46 +582,22 @@ header {
   color: var(--ink);
   border-radius: 3px;
   cursor: pointer;
-  align-self: flex-start;
+  margin-left: 6px;
 }
 .cc-table .copy-btn.copied {
   background: var(--paid);
   border-color: var(--paid);
   color: #fff;
 }
-
 @media (max-width: 560px) {
-  .cc-table thead { display: none; }
-  .cc-table, .cc-table tbody, .cc-table tr, .cc-table td {
-    display: block;
+  .cc-table { font-size: 9px; }
+  .cc-table th, .cc-table td { padding: 4px 3px; }
+  .cc-table .copy-btn {
+    font-size: 8px;
+    padding: 2px 5px;
     width: 100%;
-  }
-  .cc-table tr {
-    border: 1.5px solid var(--ink);
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-bottom: 12px;
-  }
-  .cc-table td {
-    border: none;
-    padding: 5px 0;
-    text-align: left;
-  }
-  .cc-table td::before {
-    content: attr(data-label);
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--ink-soft);
-    margin-bottom: 2px;
-  }
-  .cc-table .card-number-cell {
-    display: block;
-  }
-  .cc-table .card-number-value {
-    display: block;
-    margin-bottom: 6px;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-top: 4px;
   }
 }
