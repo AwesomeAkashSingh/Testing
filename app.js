@@ -831,7 +831,7 @@ async function loadRecheckEntries() {
               <tr>
                 <td>${escapeHtml(c.cardName)}</td>
                 <td class="num card-number-cell">
-                  ${escapeHtml(c.cardNumber)}
+                  <span class="card-number-value">${escapeHtml(c.cardNumber)}</span>
                   <button class="copy-btn" data-index="${i}">Copy</button>
                 </td>
                 <td class="num">${escapeHtml(c.expiry)}</td>
