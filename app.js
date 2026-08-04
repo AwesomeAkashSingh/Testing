@@ -5,6 +5,10 @@
   const MAINTENANCE_SHEET_NAME = 'Maintenance';
   const MAINTENANCE_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(MAINTENANCE_SHEET_NAME)}`;
 
+  const CC_SHEET_ID = '1k-b4AW8Ow9x9zSYyhdKWuW8k8xYguSnlUA-04JPgooI';
+  const CC_SHEET_NAME = 'CC';
+  const CC_CSV_URL = `https://docs.google.com/spreadsheets/d/${CC_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CC_SHEET_NAME)}`;
+
   let allEntries = [];
   let selectedPeople = new Set(); // empty set = "All"
   let statementEntries = [];
@@ -772,9 +776,88 @@ async function loadRecheckEntries() {
     renderStatementGroups();
   });
 
+  async function copyCardNumber(btn, number) {
+    try {
+      await navigator.clipboard.writeText(number);
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1500);
+    } catch (err) {
+      btn.textContent = 'Failed';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    }
+  }
+
+  async function loadCreditCards() {
+    const section = document.getElementById('creditCardsTable');
+    section.innerHTML = '<div class="loading">Loading cards…</div>';
+
+    try {
+      const res = await fetch(CC_CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const dataRows = rows.slice(1);
+
+      const cards = dataRows.map(r => ({
+        cardName: (r[0] || '').trim(),
+        cardNumber: (r[1] || '').trim(),
+        expiry: (r[2] || '').trim(),
+        cvv: (r[3] || '').trim(),
+        owner: (r[4] || '').trim()
+      })).filter(c => c.cardName || c.cardNumber);
+
+      if (!cards.length) {
+        section.innerHTML = '<div class="empty">No cards found.</div>';
+        return;
+      }
+
+      section.innerHTML = `
+        <table class="due-table cc-table">
+          <thead>
+            <tr>
+              <th>Card name</th>
+              <th>Card number</th>
+              <th>Expiry</th>
+              <th>CVV</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cards.map((c, i) => `
+              <tr>
+                <td>${escapeHtml(c.cardName)}</td>
+                <td class="num card-number-cell">
+                  ${escapeHtml(c.cardNumber)}
+                  <button class="copy-btn" data-index="${i}">Copy</button>
+                </td>
+                <td class="num">${escapeHtml(c.expiry)}</td>
+                <td class="num">${escapeHtml(c.cvv)}</td>
+                <td>${escapeHtml(c.owner)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      section.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.index, 10);
+          copyCardNumber(btn, cards[idx].cardNumber);
+        });
+      });
+    } catch (err) {
+      section.innerHTML = '<div class="err">Could not load cards.<br><br>' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
   loadData();
   loadMaintenanceTasks();
   loadLimitCheck();
   loadRecheckEntries();
   loadStaleCheckEntries();
   loadStatementCycle();
+  loadCreditCards();
