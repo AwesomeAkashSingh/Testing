@@ -562,7 +562,14 @@ header {
 }
 
 #creditSection .band-credit { background: var(--card); }
-.cc-table { table-layout: auto; }
+
+.cc-table { table-layout: fixed; }
+.cc-table th:nth-child(1), .cc-table td:nth-child(1) { width: 22%; }
+.cc-table th:nth-child(2), .cc-table td:nth-child(2) { width: 30%; }
+.cc-table th:nth-child(3), .cc-table td:nth-child(3) { width: 16%; }
+.cc-table th:nth-child(4), .cc-table td:nth-child(4) { width: 12%; }
+.cc-table th:nth-child(5), .cc-table td:nth-child(5) { width: 20%; }
+
 .cc-table td.card-number-cell {
   display: flex;
   flex-direction: column;
