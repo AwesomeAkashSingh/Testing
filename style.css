@@ -594,4 +594,9 @@ header {
 @media (max-width: 560px) {
   .cc-table { font-size: 10px; }
   .cc-table th, .cc-table td { padding: 6px 4px; }
+  .cc-table th:nth-child(3), .cc-table td:nth-child(3),
+  .cc-table th:nth-child(4), .cc-table td:nth-child(4),
+  .cc-table th:nth-child(5), .cc-table td:nth-child(5) {
+    white-space: nowrap;
+  }
 }
