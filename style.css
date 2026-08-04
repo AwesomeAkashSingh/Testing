@@ -563,12 +563,7 @@ header {
 
 #creditSection .band-credit { background: var(--card); }
 
-.cc-table { table-layout: fixed; }
-.cc-table th:nth-child(1), .cc-table td:nth-child(1) { width: 22%; }
-.cc-table th:nth-child(2), .cc-table td:nth-child(2) { width: 30%; }
-.cc-table th:nth-child(3), .cc-table td:nth-child(3) { width: 16%; }
-.cc-table th:nth-child(4), .cc-table td:nth-child(4) { width: 12%; }
-.cc-table th:nth-child(5), .cc-table td:nth-child(5) { width: 20%; }
+.cc-table { table-layout: auto; }
 
 .cc-table td.card-number-cell {
   display: flex;
@@ -599,11 +594,37 @@ header {
 }
 
 @media (max-width: 560px) {
-  .cc-table { font-size: 10px; }
-  .cc-table th, .cc-table td { padding: 6px 4px; }
-  .cc-table th:nth-child(3), .cc-table td:nth-child(3),
-  .cc-table th:nth-child(4), .cc-table td:nth-child(4),
-  .cc-table th:nth-child(5), .cc-table td:nth-child(5) {
-    white-space: nowrap;
+  .cc-table thead { display: none; }
+  .cc-table, .cc-table tbody, .cc-table tr, .cc-table td {
+    display: block;
+    width: 100%;
+  }
+  .cc-table tr {
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .cc-table td {
+    border: none;
+    padding: 5px 0;
+    text-align: left;
+  }
+  .cc-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+  .cc-table .card-number-cell {
+    display: block;
+  }
+  .cc-table .card-number-value {
+    display: block;
+    margin-bottom: 6px;
   }
 }
