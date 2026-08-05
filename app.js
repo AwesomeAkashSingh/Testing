@@ -5,9 +5,8 @@
   const MAINTENANCE_SHEET_NAME = 'Maintenance';
   const MAINTENANCE_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(MAINTENANCE_SHEET_NAME)}`;
 
-  const CC_SHEET_ID = '1k-b4AW8Ow9x9zSYyhdKWuW8k8xYguSnlUA-04JPgooI';
   const CC_SHEET_NAME = 'CC';
-  const CC_CSV_URL = `https://docs.google.com/spreadsheets/d/${CC_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CC_SHEET_NAME)}`;
+  const CC_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CC_SHEET_NAME)}`;
 
   let allEntries = [];
   let selectedPeople = new Set(); // empty set = "All"
