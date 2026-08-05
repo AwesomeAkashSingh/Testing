@@ -562,7 +562,16 @@ header {
 }
 
 #creditSection .band-credit { background: var(--card); }
-.cc-table { table-layout: fixed; }
+
+.cc-table {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
+}
+
 .cc-table th:nth-child(1), .cc-table td:nth-child(1) { width: 20%; }
 .cc-table th:nth-child(2), .cc-table td:nth-child(2) { width: 38%; }
 .cc-table th:nth-child(3), .cc-table td:nth-child(3) { width: 14%; }
